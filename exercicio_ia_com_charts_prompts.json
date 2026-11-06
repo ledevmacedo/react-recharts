@@ -1,0 +1,66 @@
+{
+  "titulo": "Exercício — IA com charts",
+  "objetivo": "Gerar um mini painel React com gráficos justificáveis a partir do dataset de leituras de energia.",
+  "dataset": {
+    "origem": "src/api/energyApi.ts",
+    "validacao": "src/schemas/energySchema.ts -> energyReadingListSchema",
+    "tipo": "EnergyReading[]",
+    "campos": {
+      "recordedAt": { "tipo": "ISO datetime", "papel": "dimensão temporal" },
+      "area": { "tipo": "kitchen | living-room | bedroom | office", "papel": "dimensão categórica" },
+      "consumptionWh": { "tipo": "number", "papel": "medida", "unidade": "Wh" },
+      "gridWh": { "tipo": "number", "papel": "medida", "unidade": "Wh" },
+      "solarWh": { "tipo": "number", "papel": "medida", "unidade": "Wh" }
+    }
+  },
+  "restricoes_comuns": [
+    "TypeScript estrito, React e Recharts 3.x",
+    "Usar apenas campos existentes no contrato ou transformações explícitas",
+    "Validar os dados com Zod antes de transformar",
+    "Incluir loading, estado vazio, erro, título, resumo e tabela alternativa",
+    "Não usar estilos inline nem depender apenas da cor",
+    "Declarar limitações da interpretação"
+  ],
+  "prompt_base": "És um/a developer React sénior. Trabalha no projeto atual com TypeScript estrito, Recharts 3.x e Zod. Usa exclusivamente o dataset EnergyReading[] obtido por src/api/energyApi.ts e validado por energyReadingListSchema em src/schemas/energySchema.ts. Antes de escrever JSX, confirma a pergunta, a dimensão, a medida, a unidade, a transformação necessária e a origem dos dados. Não inventes campos, valores, zeros, dependências ou conclusões. Se precisares de agregar dados, cria uma função pura e tipada fora do componente. O componente deve ser responsivo, acessível e incluir loading, vazio, erro, título, resumo, tooltip e tabela alternativa. No final, lista os dataKeys usados, a origem de cada campo, a interpretação permitida e o que não pode ser concluído.",
+  "prompts_componentes": [
+    {
+      "id": "consumo_por_area",
+      "componente": "ConsumptionByAreaChart.tsx",
+      "pergunta": "Que áreas consumiram mais energia no período selecionado?",
+      "tipo_grafico": "BarChart horizontal",
+      "origem_dados": "EnergyReading[] de src/api/energyApi.ts; agregar consumptionWh por area e converter para kWh apenas na transformação ou formatação",
+      "prompt": "A partir do prompt_base, cria src/components/charts/ConsumptionByAreaChart.tsx. Responde à pergunta 'Que áreas consumiram mais energia no período selecionado?'. Usa um BarChart horizontal, com area como categoria e consumo total em kWh como medida. Ordena as barras de forma decrescente, mantém o eixo quantitativo a partir de zero e mostra a unidade kWh. Explica a agregação e cria uma tabela alternativa com area e consumptionKwh."
+    },
+    {
+      "id": "consumo_ao_longo_do_tempo",
+      "componente": "DailyConsumptionChart.tsx",
+      "pergunta": "Como varia o consumo total ao longo dos dias?",
+      "tipo_grafico": "LineChart",
+      "origem_dados": "EnergyReading[] de src/api/energyApi.ts; agrupar por dia de recordedAt e somar consumptionWh",
+      "prompt": "A partir do prompt_base, cria src/components/charts/DailyConsumptionChart.tsx. Responde à pergunta 'Como varia o consumo total ao longo dos dias?'. Usa um LineChart com recordedAt agrupado por dia no eixo X e consumo diário em kWh no eixo Y. Ordena cronologicamente, representa dias sem leitura como ausência de dado e não como zero, e inclui tooltip, tabela diária e resumo sem declarar causas para subidas ou descidas."
+    },
+    {
+      "id": "origem_da_energia",
+      "componente": "DailyEnergyMixChart.tsx",
+      "pergunta": "Qual foi a contribuição diária da rede e da energia solar?",
+      "tipo_grafico": "AreaChart empilhado",
+      "origem_dados": "EnergyReading[] de src/api/energyApi.ts; agrupar por dia de recordedAt e somar gridWh e solarWh",
+      "prompt": "A partir do prompt_base, cria src/components/charts/DailyEnergyMixChart.tsx. Responde à pergunta 'Qual foi a contribuição diária da rede e da energia solar?'. Usa um AreaChart empilhado com duas séries: gridWh e solarWh, convertidas para kWh de forma explícita. Usa a mesma escala temporal para as duas séries, legendas textuais 'Rede' e 'Solar', tabela alternativa e uma nota que não permite inferir eficiência ou causalidade."
+    },
+    {
+      "id": "resumo_acessivel",
+      "componente": "EnergySummaryTable.tsx",
+      "pergunta": "Como disponibilizar os mesmos dados sem depender do gráfico?",
+      "tipo_grafico": "Sem gráfico — tabela acessível e KPIs",
+      "origem_dados": "View models produzidos pelas mesmas transformações dos três componentes anteriores",
+      "prompt": "A partir do prompt_base, cria src/components/charts/EnergySummaryTable.tsx. Não cries um novo dataset. Reutiliza os view models já produzidos para apresentar uma tabela acessível com área, período, consumo total, energia da rede e energia solar, usando as unidades corretas. Adiciona no máximo três KPIs calculados a partir dos dados recebidos e documenta cada cálculo. A tabela deve continuar utilizável quando o gráfico não carrega."
+    }
+  ],
+  "entrega": [
+    "Quatro componentes React funcionais",
+    "Transformações puras e tipadas fora dos componentes",
+    "Tabela alternativa acessível",
+    "Lista de dataKeys, fontes, unidades e limitações",
+    "Checklist final: npm run lint, npx tsc --noEmit e inspeção visual"
+  ]
+}
